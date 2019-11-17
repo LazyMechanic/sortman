@@ -1,8 +1,10 @@
 package questions
 
 import (
+	"fmt"
 	"github.com/AlecAivazis/survey"
 	"github.com/LazyMechanic/sortman/internal/cli/dialog"
+	"os"
 )
 
 func confirm(msg string, defaultValue bool) bool {
@@ -63,18 +65,34 @@ func IsRequestCorrect() bool {
 	return confirm("Is request correct:", true)
 }
 
-func Template() string {
-	return input("Enter template:", "", "Files which be copy or move to out dir. Templates are listed with a space, [*.png *.jpg] for example", survey.WithValidator(survey.Required))
+func Patterns() string {
+	return input("Enter patterns:", "", "Files which be copy or move to out dir. Patterns are listed with a ';', [*.png;*.jpg] for example", survey.WithValidator(survey.Required))
 }
 
 func Exclude() string {
-	return input("Enter exclude:", "", "Files or directories to be dropped from the selection. Exclude are listed with a space, [somefolder/ somefolder2/*.png] for example")
+	return input("Enter exclude:", "", "Files or directories to be dropped from the selection. Exclude are listed with a ';', [somefolder/;somefolder2/*.png] for example")
+}
+
+func isDirValidator(val interface{}) error {
+	if val.(string) == "" {
+		return nil
+	}
+
+	fileStat, err := os.Stat(val.(string))
+	if err != nil {
+		return err
+	}
+
+	if !fileStat.IsDir() {
+		return fmt.Errorf("%q is not directory", fileStat.Name())
+	}
+	return nil
 }
 
 func InDirectory() string {
-	return input("Enter input directory:", "", "Replace current working directory for this request. Absolute or relative working directory path")
+	return input("Enter input directory:", "", "Replace current working directory for this request. Absolute or relative working directory path", survey.WithValidator(isDirValidator))
 }
 
 func OutDirectory() string {
-	return input("Enter out directory:", "", "Set out directory for this request. Absolute or relative out directory path", survey.WithValidator(survey.Required))
+	return input("Enter out directory:", "", "Set out directory for this request. Absolute or relative out directory path", survey.WithValidator(survey.Required), survey.WithValidator(isDirValidator))
 }

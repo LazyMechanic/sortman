@@ -3,9 +3,14 @@ package actions
 import (
 	"fmt"
 	"github.com/LazyMechanic/sortman/internal/cli/dialog"
+	"github.com/LazyMechanic/sortman/internal/cli/flags"
 	"github.com/LazyMechanic/sortman/internal/cli/questions"
 	"github.com/LazyMechanic/sortman/internal/types"
 	gocli "github.com/urfave/cli"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 const (
@@ -17,16 +22,29 @@ var (
 	config types.Config
 )
 
+func absDir(root string, path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	} else {
+		out, err := filepath.Abs(filepath.Join(root, path))
+		if err != nil {
+			panic(err)
+		}
+
+		return out
+	}
+}
+
 func toAsk() error {
 	for {
 		var whatToDo = questions.WhatToDo()
 		switch whatToDo {
 		case dialog.AddRequest:
 			config.Requests = append(config.Requests, types.Request{
-				Template:     questions.Template(),
-				Exclude:      questions.Exclude(),
-				InDirectory:  questions.InDirectory(),
-				OutDirectory: questions.OutDirectory(),
+				Patterns:     strings.Split(questions.Patterns(), ";"),
+				Exclude:      strings.Split(questions.Exclude(), ";"),
+				InDirectory:  absDir(config.WorkingDirectory, questions.InDirectory()),
+				OutDirectory: absDir(flags.OutDirectory, questions.OutDirectory()),
 			})
 		case dialog.Execute:
 			return &types.Execute{}
@@ -38,8 +56,45 @@ func toAsk() error {
 	return nil
 }
 
+func filesToExecute(request types.Request) ([]string, error) {
+	if flags.Recursive {
+		var err = filepath.Walk(request.InDirectory, func(path string, info os.FileInfo, err error) error {
+
+			return nil
+		})
+		if err != nil {
+			return []string{}, err
+		}
+	} else {
+		files, err := ioutil.ReadDir(request.InDirectory)
+		if err != nil {
+			return []string{}, err
+		}
+
+		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+
+			/*for _, pattern := range request.Patterns {
+
+			}*/
+		}
+	}
+
+	return []string{}, nil
+}
+
 func execute() error {
-	// for _, request := range config.Requests {}
+	/*
+	var err error
+	for _, request := range config.Requests {
+		files, err := filesToExecute(request)
+		if err != nil {
+			return err
+		}
+	}
+	*/
 	return nil
 }
 
@@ -55,7 +110,7 @@ func workingDirectory(c *gocli.Context) (string, error) {
 	return ".", nil
 }
 
-func Copy(c *gocli.Context) error {
+func execCommand(c *gocli.Context) error {
 	var err error
 
 	config.WorkingDirectory, err = workingDirectory(c)
@@ -79,13 +134,12 @@ func Copy(c *gocli.Context) error {
 	return err
 }
 
+func Copy(c *gocli.Context) error {
+	config.Action = copy
+	return execCommand(c)
+}
+
 func Move(c *gocli.Context) error {
-	var err error
-
-	config.WorkingDirectory, err = workingDirectory(c)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	config.Action = move
+	return execCommand(c)
 }

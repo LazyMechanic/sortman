@@ -3,8 +3,8 @@ package types
 type Action string
 
 type Request struct {
-	Template     string
-	Exclude      string
+	Patterns     []string
+	Exclude      []string
 	InDirectory  string
 	OutDirectory string
 }
@@ -15,12 +15,14 @@ type Config struct {
 	Action           Action
 }
 
-type Cancel struct {}
+type Cancel struct{}
+
 func (e *Cancel) Error() string {
 	return "Nothing happen"
 }
 
-type Execute struct {}
+type Execute struct{}
+
 func (e *Execute) Error() string {
 	return ""
 }

@@ -14,7 +14,7 @@ var (
 		Name:        "r, recursive",
 		Usage:       "use recursive search",
 		Destination: &Recursive,
-		Value:       true,
+		Value:       false,
 	}
 
 	OutDirectoryFlag gocli.Flag = &gocli.StringFlag{

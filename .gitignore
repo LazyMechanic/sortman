@@ -1,0 +1,5 @@
+build/
+sortman
+.idea/
+*.exe
+dist/

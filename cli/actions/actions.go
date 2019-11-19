@@ -5,17 +5,11 @@ import (
 	"github.com/LazyMechanic/sortman/internal/cli/dialog"
 	"github.com/LazyMechanic/sortman/internal/cli/flags"
 	"github.com/LazyMechanic/sortman/internal/cli/questions"
+	"github.com/LazyMechanic/sortman/internal/execute"
 	"github.com/LazyMechanic/sortman/internal/types"
 	gocli "github.com/urfave/cli"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
-)
-
-const (
-	copy types.Action = "copy"
-	move types.Action = "move"
 )
 
 var (
@@ -23,6 +17,10 @@ var (
 )
 
 func absDir(root string, path string) string {
+	if root == path {
+		return path
+	}
+
 	if filepath.IsAbs(path) {
 		return path
 	} else {
@@ -43,8 +41,8 @@ func toAsk() error {
 			config.Requests = append(config.Requests, types.Request{
 				Patterns:     strings.Split(questions.Patterns(), ";"),
 				Exclude:      strings.Split(questions.Exclude(), ";"),
-				InDirectory:  absDir(config.WorkingDirectory, questions.InDirectory()),
-				OutDirectory: absDir(flags.OutDirectory, questions.OutDirectory()),
+				InDirectory:  absDir(config.WorkingDirectory, questions.InDirectory(config.WorkingDirectory)),
+				OutDirectory: absDir(flags.OutDirectory, questions.OutDirectory(flags.OutDirectory)),
 			})
 		case dialog.Execute:
 			return &types.Execute{}
@@ -53,48 +51,6 @@ func toAsk() error {
 		}
 	}
 
-	return nil
-}
-
-func filesToExecute(request types.Request) ([]string, error) {
-	if flags.Recursive {
-		var err = filepath.Walk(request.InDirectory, func(path string, info os.FileInfo, err error) error {
-
-			return nil
-		})
-		if err != nil {
-			return []string{}, err
-		}
-	} else {
-		files, err := ioutil.ReadDir(request.InDirectory)
-		if err != nil {
-			return []string{}, err
-		}
-
-		for _, file := range files {
-			if file.IsDir() {
-				continue
-			}
-
-			/*for _, pattern := range request.Patterns {
-
-			}*/
-		}
-	}
-
-	return []string{}, nil
-}
-
-func execute() error {
-	/*
-	var err error
-	for _, request := range config.Requests {
-		files, err := filesToExecute(request)
-		if err != nil {
-			return err
-		}
-	}
-	*/
 	return nil
 }
 
@@ -129,17 +85,17 @@ func execCommand(c *gocli.Context) error {
 		return err
 	}
 
-	err = execute()
+	err = execute.Execute(&config)
 
 	return err
 }
 
 func Copy(c *gocli.Context) error {
-	config.Action = copy
+	config.Action = dialog.CopyAction
 	return execCommand(c)
 }
 
 func Move(c *gocli.Context) error {
-	config.Action = move
+	config.Action = dialog.MoveAction
 	return execCommand(c)
 }

@@ -12,6 +12,12 @@ func Run() {
 }
 
 func process() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatalln(r)
+		}
+	}()
+
 	app := gocli.NewApp()
 	app.Name = "sortman"
 	app.Version = "0.1"

@@ -5,6 +5,7 @@ type Action string
 type Request struct {
 	Patterns     []string
 	Exclude      []string
+	Files        []string
 	InDirectory  string
 	OutDirectory string
 }

@@ -89,10 +89,10 @@ func isDirValidator(val interface{}) error {
 	return nil
 }
 
-func InDirectory() string {
-	return input("Enter input directory:", "", "Replace current working directory for this request. Absolute or relative working directory path", survey.WithValidator(isDirValidator))
+func InDirectory(inDefaultDir string) string {
+	return input("Enter input directory:", inDefaultDir, "Replace current working directory for this request. Absolute or relative working directory path", survey.WithValidator(isDirValidator))
 }
 
-func OutDirectory() string {
-	return input("Enter out directory:", "", "Set out directory for this request. Absolute or relative out directory path", survey.WithValidator(survey.Required), survey.WithValidator(isDirValidator))
+func OutDirectory(outDefaultDir string) string {
+	return input("Enter out directory:", outDefaultDir, "Set out directory for this request. Absolute or relative out directory path", survey.WithValidator(isDirValidator))
 }

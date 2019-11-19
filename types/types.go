@@ -4,16 +4,17 @@ type Action string
 
 type Request struct {
 	Patterns     []string
-	Exclude      []string
+	Exclusions   []string
 	Files        []string
 	InDirectory  string
 	OutDirectory string
 }
 
 type Config struct {
-	WorkingDirectory string
-	Requests         []Request
-	Action           Action
+	InDirectory  string
+	OutDirectory string
+	Requests     []Request
+	Action       Action
 }
 
 type Cancel struct{}

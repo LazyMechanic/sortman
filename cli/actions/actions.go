@@ -2,48 +2,42 @@ package actions
 
 import (
 	"fmt"
-	"github.com/LazyMechanic/sortman/internal/cli/dialog"
-	"github.com/LazyMechanic/sortman/internal/cli/flags"
-	"github.com/LazyMechanic/sortman/internal/cli/questions"
-	"github.com/LazyMechanic/sortman/internal/execute"
-	"github.com/LazyMechanic/sortman/internal/types"
+	"github.com/LazyMechanic/sortman/cli/dialog"
+	"github.com/LazyMechanic/sortman/cli/questions"
+	"github.com/LazyMechanic/sortman/execute"
+	"github.com/LazyMechanic/sortman/types"
 	gocli "github.com/urfave/cli"
 	"path/filepath"
 	"strings"
 )
 
-var (
-	config types.Config
-)
+func removeEmptyStrings(strs []string) []string {
+	var result []string
 
-func absDir(root string, path string) string {
-	if root == path {
-		return path
-	}
-
-	if filepath.IsAbs(path) {
-		return path
-	} else {
-		out, err := filepath.Abs(filepath.Join(root, path))
-		if err != nil {
-			panic(err)
+	for _, str := range strs {
+		if str != "" {
+			result = append(result, str)
 		}
-
-		return out
 	}
+
+	return result
 }
 
-func toAsk() error {
+func toAsk(config *types.Config) error {
 	for {
 		var whatToDo = questions.WhatToDo()
 		switch whatToDo {
 		case dialog.AddRequest:
 			config.Requests = append(config.Requests, types.Request{
-				Patterns:     strings.Split(questions.Patterns(), ";"),
-				Exclude:      strings.Split(questions.Exclude(), ";"),
-				InDirectory:  absDir(config.WorkingDirectory, questions.InDirectory(config.WorkingDirectory)),
-				OutDirectory: absDir(flags.OutDirectory, questions.OutDirectory(flags.OutDirectory)),
+				Patterns:     removeEmptyStrings(strings.Split(questions.Patterns(), ";")),
+				Exclusions:   removeEmptyStrings(strings.Split(questions.Exclude(), ";")),
+				InDirectory:  questions.InDirectory(config.InDirectory),
+				OutDirectory: questions.OutDirectory(config.OutDirectory),
 			})
+
+			if !questions.IsRequestCorrect() {
+				continue
+			}
 		case dialog.Execute:
 			return &types.Execute{}
 		case dialog.Cancel:
@@ -54,27 +48,48 @@ func toAsk() error {
 	return nil
 }
 
-func workingDirectory(c *gocli.Context) (string, error) {
+func inDirectory(c *gocli.Context) (string, error) {
 	if c.NArg() > 2 {
 		return "", fmt.Errorf("Invalid number of arguments")
 	}
 
-	if c.NArg() == 1 {
-		return c.Args().Get(0), nil
+	if c.NArg() > 0 {
+		return filepath.Abs(c.Args().Get(0))
 	}
 
 	return ".", nil
 }
 
-func execCommand(c *gocli.Context) error {
+func outDirectory(c *gocli.Context) (string, error) {
+	if c.NArg() > 2 {
+		return "", fmt.Errorf("Invalid number of arguments")
+	}
+
+	if c.NArg() == 2 {
+		return filepath.Abs(c.Args().Get(1))
+	}
+
+	return ".", nil
+}
+
+func execCommand(c *gocli.Context, config *types.Config) error {
 	var err error
 
-	config.WorkingDirectory, err = workingDirectory(c)
+	if c.NArg() > 2 {
+		return fmt.Errorf("Invalid number of arguments")
+	}
+
+	config.InDirectory, err = inDirectory(c)
 	if err != nil {
 		return err
 	}
 
-	err = toAsk()
+	config.OutDirectory, err = outDirectory(c)
+	if err != nil {
+		return err
+	}
+
+	err = toAsk(config)
 	switch err.(type) {
 	case *types.Execute:
 		/* continue */
@@ -85,17 +100,21 @@ func execCommand(c *gocli.Context) error {
 		return err
 	}
 
-	err = execute.Execute(&config)
+	err = execute.Execute(config)
 
 	return err
 }
 
 func Copy(c *gocli.Context) error {
+	var config types.Config
 	config.Action = dialog.CopyAction
-	return execCommand(c)
+
+	return execCommand(c, &config)
 }
 
 func Move(c *gocli.Context) error {
+	var config types.Config
 	config.Action = dialog.MoveAction
-	return execCommand(c)
+
+	return execCommand(c, &config)
 }

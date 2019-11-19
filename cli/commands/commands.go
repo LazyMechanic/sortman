@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/LazyMechanic/sortman/internal/cli/actions"
+	"github.com/LazyMechanic/sortman/cli/actions"
 	gocli "github.com/urfave/cli"
 )
 
@@ -10,9 +10,7 @@ var (
 		Name:      "copy",
 		Aliases:   []string{"c"},
 		Usage:     "copy files",
-		ArgsUsage: "<working-directory>",
-		Flags: []gocli.Flag{
-		},
+		ArgsUsage: "<from-directory> <to-directory>",
 		Action: actions.Copy,
 	}
 
@@ -20,9 +18,7 @@ var (
 		Name:      "move",
 		Aliases:   []string{"m"},
 		Usage:     "move files",
-		ArgsUsage: "<working-directory>",
-		Flags: []gocli.Flag{
-		},
+		ArgsUsage: "<from-directory> <to-directory>",
 		Action: actions.Move,
 	}
 )

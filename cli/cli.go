@@ -1,10 +1,18 @@
 package cli
 
 import (
-	"github.com/LazyMechanic/sortman/internal/cli/commands"
+	"github.com/LazyMechanic/sortman/cli/commands"
 	gocli "github.com/urfave/cli"
 	"log"
 	"os"
+)
+
+var (
+	appName        string = "sortman"
+	appUsage       string = "utility for sorting files by patterns to specific folders"
+	appVersion     string = "0.2"
+	appAuthorName  string = "LazyMechanic"
+	appAuthorEmail string = "AsharnRus@gmail.com"
 )
 
 func Run() {
@@ -19,15 +27,15 @@ func process() {
 	}()
 
 	app := gocli.NewApp()
-	app.Name = "sortman"
-	app.Version = "0.1"
+	app.Name = appName
+	app.Version = appVersion
 	app.Authors = []*gocli.Author{
 		&gocli.Author{
-			Name:  "LazyMechanic",
-			Email: "asharnrus@gmail.com",
+			Name:  appAuthorName,
+			Email: appAuthorEmail,
 		},
 	}
-	app.Usage = "utility for sorting files by patterns to specific folders"
+	app.Usage = appUsage
 
 	app.Commands = []*gocli.Command{
 		&commands.Copy,

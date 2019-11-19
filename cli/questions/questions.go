@@ -3,8 +3,9 @@ package questions
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey"
-	"github.com/LazyMechanic/sortman/internal/cli/dialog"
+	"github.com/LazyMechanic/sortman/cli/dialog"
 	"os"
+	"path/filepath"
 )
 
 func confirm(msg string, defaultValue bool) bool {
@@ -44,7 +45,9 @@ func input(msg string, defaultValue string, help string, opts ...survey.AskOpt) 
 		Help:    help,
 	}
 
-	err := survey.AskOne(prompt, &answer, opts...)
+	var err error
+
+	err = survey.AskOne(prompt, &answer, opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -66,11 +69,11 @@ func IsRequestCorrect() bool {
 }
 
 func Patterns() string {
-	return input("Enter patterns:", "", "Files which be copy or move to out dir. Patterns are listed with a ';', [*.png;*.jpg] for example", survey.WithValidator(survey.Required))
+	return input("Enter patterns:", "", "Files which be copy or move to out dir. Patterns are listed with a ';', [*.png;*.jpg] for example", nil, survey.WithValidator(survey.Required))
 }
 
 func Exclude() string {
-	return input("Enter exclude:", "", "Files or directories to be dropped from the selection. Exclude are listed with a ';', [somefolder/;somefolder2/*.png] for example")
+	return input("Enter exclusions:", "", "Files or directories to be dropped from the selection. Exclusions are listed with a ';', [somefolder/;somefolder2/*.png] for example", nil)
 }
 
 func isDirValidator(val interface{}) error {
@@ -84,15 +87,32 @@ func isDirValidator(val interface{}) error {
 	}
 
 	if !fileStat.IsDir() {
-		return fmt.Errorf("%q is not directory", fileStat.Name())
+		return fmt.Errorf("%q directory not found", fileStat.Name())
 	}
 	return nil
 }
 
+func absDir(root string, path string) string {
+	if root == path {
+		return path
+	}
+
+	if filepath.IsAbs(path) {
+		return path
+	}
+
+	out, err := filepath.Abs(filepath.Join(root, path))
+	if err != nil {
+		panic(err)
+	}
+
+	return out
+}
+
 func InDirectory(inDefaultDir string) string {
-	return input("Enter input directory:", inDefaultDir, "Replace current working directory for this request. Absolute or relative working directory path", survey.WithValidator(isDirValidator))
+	return absDir(inDefaultDir, input("Enter input directory:", inDefaultDir, "Set input directory for this request", survey.WithValidator(isDirValidator)))
 }
 
 func OutDirectory(outDefaultDir string) string {
-	return input("Enter out directory:", outDefaultDir, "Set out directory for this request. Absolute or relative out directory path", survey.WithValidator(isDirValidator))
+	return absDir(outDefaultDir, input("Enter out directory:", outDefaultDir, "Set out directory for this request"))
 }

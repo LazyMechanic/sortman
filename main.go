@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/LazyMechanic/sortman/internal/cli"
+	"github.com/LazyMechanic/sortman/cli"
 )
 
 func main() {

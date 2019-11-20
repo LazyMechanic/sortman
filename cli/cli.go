@@ -7,10 +7,10 @@ import (
 	"os"
 )
 
-var (
+const (
 	appName        string = "sortman"
 	appUsage       string = "utility for sorting files by patterns to specific folders"
-	appVersion     string = "0.2"
+	appVersion     string = "0.1"
 	appAuthorName  string = "LazyMechanic"
 	appAuthorEmail string = "AsharnRus@gmail.com"
 )

@@ -7,6 +7,7 @@ import (
 	"github.com/LazyMechanic/sortman/execute"
 	"github.com/LazyMechanic/sortman/types"
 	gocli "github.com/urfave/cli"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -23,13 +24,23 @@ func removeEmptyStrings(strs []string) []string {
 	return result
 }
 
+func showRequests(requests *[]types.Request) {
+	if len(*requests) == 0 {
+		fmt.Println("No have requests")
+	}
+
+	for index, _ := range *requests {
+		(*requests)[index].Fprint(os.Stdout)
+	}
+}
+
 func toAsk(config *types.Config) error {
 	for {
 		var whatToDo = questions.WhatToDo()
 		switch whatToDo {
 		case dialog.AddRequest:
 			config.Requests = append(config.Requests, types.Request{
-				Patterns:     removeEmptyStrings(strings.Split(questions.Patterns(), ";")),
+				Patterns:     removeEmptyStrings(strings.Split(questions.Patterns(config.Action), ";")),
 				Exclusions:   removeEmptyStrings(strings.Split(questions.Exclude(), ";")),
 				InDirectory:  questions.InDirectory(config.InDirectory),
 				OutDirectory: questions.OutDirectory(config.OutDirectory),
@@ -38,6 +49,8 @@ func toAsk(config *types.Config) error {
 			if !questions.IsRequestCorrect() {
 				continue
 			}
+		case dialog.ShowRequests:
+			showRequests(&config.Requests)
 		case dialog.Execute:
 			return &types.Execute{}
 		case dialog.Cancel:
@@ -57,7 +70,7 @@ func inDirectory(c *gocli.Context) (string, error) {
 		return filepath.Abs(c.Args().Get(0))
 	}
 
-	return ".", nil
+	return filepath.Abs(".")
 }
 
 func outDirectory(c *gocli.Context) (string, error) {
@@ -69,7 +82,7 @@ func outDirectory(c *gocli.Context) (string, error) {
 		return filepath.Abs(c.Args().Get(1))
 	}
 
-	return ".", nil
+	return filepath.Abs(".")
 }
 
 func execCommand(c *gocli.Context, config *types.Config) error {

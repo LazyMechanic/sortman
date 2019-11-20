@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey"
 	"github.com/LazyMechanic/sortman/cli/dialog"
+	"github.com/LazyMechanic/sortman/types"
 	"os"
 	"path/filepath"
 )
@@ -56,24 +57,19 @@ func input(msg string, defaultValue string, help string, opts ...survey.AskOpt) 
 }
 
 func WhatToDo() string {
-	var options = []string{
-		dialog.AddRequest,
-		dialog.Execute,
-		dialog.Cancel,
-	}
-	return selectOptions("What to do:", options[0], options)
+	return selectOptions("What to do:", dialog.WhatToDo[0], dialog.WhatToDo)
 }
 
 func IsRequestCorrect() bool {
 	return confirm("Is request correct:", true)
 }
 
-func Patterns() string {
-	return input("Enter patterns:", "", "Files which be copy or move to out dir. Patterns are listed with a ';', [*.png;*.jpg] for example", nil, survey.WithValidator(survey.Required))
+func Patterns(action types.Action) string {
+	return input("Enter patterns:", "", fmt.Sprintf("Files which be %s to output directory. Separates patterns with %q, %q for example. Use '**/...' for recursive find, %q for example", action, ";", "*.png;*.jpg", "**/*.txt"), nil, survey.WithValidator(survey.Required))
 }
 
 func Exclude() string {
-	return input("Enter exclusions:", "", "Files or directories to be dropped from the selection. Exclusions are listed with a ';', [somefolder/;somefolder2/*.png] for example", nil)
+	return input("Enter exclusions:", "", fmt.Sprintf("Remove files or directories from selections. Separates exclusions with %q, %q for example", ";", "somefolder/;somefolder2/*.png"), nil)
 }
 
 func isDirValidator(val interface{}) error {
@@ -114,5 +110,5 @@ func InDirectory(inDefaultDir string) string {
 }
 
 func OutDirectory(outDefaultDir string) string {
-	return absDir(outDefaultDir, input("Enter out directory:", outDefaultDir, "Set out directory for this request"))
+	return absDir(outDefaultDir, input("Enter output directory:", outDefaultDir, "Set output directory for this request"))
 }

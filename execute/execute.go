@@ -51,7 +51,7 @@ func filesToExecute(request *types.Request) ([]string, error) {
 }
 
 func isExist(file string) bool {
-	_, err := os.Stat(file);
+	_, err := os.Stat(file)
 	return !os.IsNotExist(err)
 }
 

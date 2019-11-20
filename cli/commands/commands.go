@@ -11,7 +11,7 @@ var (
 		Aliases:   []string{"c"},
 		Usage:     "copy files",
 		ArgsUsage: "<from-directory> <to-directory>",
-		Action: actions.Copy,
+		Action:    actions.Copy,
 	}
 
 	Move = gocli.Command{
@@ -19,6 +19,6 @@ var (
 		Aliases:   []string{"m"},
 		Usage:     "move files",
 		ArgsUsage: "<from-directory> <to-directory>",
-		Action: actions.Move,
+		Action:    actions.Move,
 	}
 )

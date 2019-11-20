@@ -9,3 +9,4 @@
 </p>
 
 ## Usage
+![MoveCommand](./docs/term_move.svg)

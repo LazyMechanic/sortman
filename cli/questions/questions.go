@@ -2,7 +2,7 @@ package questions
 
 import (
 	"fmt"
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/LazyMechanic/sortman/cli/dialog"
 	"github.com/LazyMechanic/sortman/types"
 	"os"

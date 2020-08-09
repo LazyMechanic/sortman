@@ -29,17 +29,20 @@ func process() {
 	app := gocli.NewApp()
 	app.Name = appName
 	app.Version = appVersion
-	app.Authors = []*gocli.Author{
-		&gocli.Author{
+	app.Authors = []gocli.Author{
+
+	}
+	app.Authors = []gocli.Author{
+		gocli.Author{
 			Name:  appAuthorName,
 			Email: appAuthorEmail,
 		},
 	}
 	app.Usage = appUsage
 
-	app.Commands = []*gocli.Command{
-		&commands.Copy,
-		&commands.Move,
+	app.Commands = []gocli.Command{
+		commands.Copy,
+		commands.Move,
 	}
 
 	err := app.Run(os.Args)

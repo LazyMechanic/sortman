@@ -108,7 +108,7 @@ func Execute(config *types.Config) error {
 
 		switch config.Action {
 		case dialog.CopyAction:
-			err = doAction(request, copy.Copy)
+			err = doAction(request, func(from string, to string) error { return copy.Copy(from, to) })
 		case dialog.MoveAction:
 			err = doAction(request, os.Rename)
 		default:
